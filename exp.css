@@ -1,0 +1,10 @@
+body {
+    padding: 5px;
+}
+
+#play {
+    float: left;
+    width: 28px;
+    height: 28px;
+    margin: -7px 0 0 0;
+}

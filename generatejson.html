@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>bla</title>
+    <script src="jquery-1.10.2.js"></script>
+    <script>
+        function getRandomArbitary (min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        $(function () {
+            $.getJSON('package.json', function (data) {
+                $("#bla").append("{<br> \"states\": <br>{");
+                $.each(data.states,function(i,ob){
+                   console.log(i+ ":"+$(this).text());
+                    $("#bla").append("\""+i+"\""+":<br> {");
+                    $.each(this,function(key,value){
+                    //   console.log(key+ ":"+value);
+                        $("#bla").append("\""+key+"\"" +": "+ getRandomArbitary(1,150)+" ,<br>");
+                    });
+                    $("#bla").append("},");
+                });
+                $("#bla").append("}");
+
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="bla"></div>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jVectorMap demo</title>
+    <link rel="stylesheet" href="jquery-jvectormap-1.1.1.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="exp.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" media="all"
+          href="jquery-ui-1.10.3.custom/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.css"/>
+    <script src="jquery-1.10.2.js"></script>
+    <script src="jquery-jvectormap-1.1.1.min.js"></script>
+    <script src="jquery-jvectormap-1.2.2.min.js"></script>
+
+    <script src="jquery-jvectormap-world-mill-en.js"></script>
+    <script src="jquery-ui-1.10.3.custom/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.js"></script>
+
+
+</head>
+<body>
+<div id="world-map" style="width: 1400px; height: 600px"></div>
+<br>
+<button id="play">Play</button>
+<div id="time-slider" style="margin-left: 50px; margin-right: 10px;"></div>
+<script>
+
+    $(function () {
+        var currentSlide = 0;
+        var playInterval;
+        var slideDuration = 1000; // in milliseconds
+        var autoRewind = true;
+        var val = 2001;
+        var mapObject;
+        var values = [];
+        $.getJSON('package.json', function (data) {
+            var statesValues = jvm.values.apply({}, jvm.values(data.states))          ;
+            $.each(data.states,function(i){
+                values.push(i);
+            });
+            console.log(data.states[val]);
+            $('#world-map').vectorMap({
+                map: 'world_mill_en',
+                backgroundColor: '#ffffff',
+                series: {
+                    regions: [
+                        {
+                            attribute: 'fill',
+                            scale: [ '#757575', '#f3c63a', '#ecb733', '#e39e32', '#d7872c', '#cf6221', '#c83618' , '#b43f3b'],
+                            values: data.states[val],
+                            min: jvm.min(statesValues),
+                            max: jvm.max(statesValues)
+                        }
+                    ]
+                },
+                regionStyle: {
+                    initial: {
+                        fill: '#F5F5F5',
+                        "fill-opacity": 1,
+                        stroke: '#000000',
+                        "stroke-width": 0.07,
+                        "stroke-opacity": 1
+                    },
+                    hover: {
+                        "fill-opacity": 0.8
+                    },
+                    selected: {
+                        fill: '#555555'
+                    },
+                    selectedHover: {
+                    }
+                },
+                onRegionLabelShow: function (event, label, code) {
+                    if (data.states[val][code] !== undefined) {
+                        label.html(
+                                '<b>' + label.html() + '</b></br>' + 'yr: ' + val +
+                                        '<b> value: </b>' + data.states[val][code])
+                        ;
+                    } else {
+                        label.html(
+                                '<b>' + label.html() + '</b></br>' + 'No data')
+
+                        ;
+
+                    }
+                }
+            });
+
+            mapObject = $('#world-map').vectorMap('get', 'mapObject');
+
+            $('#time-slider').slider({
+                value: val,
+                min: 2001,
+                max: 2005,
+                step: 1,
+                slide: function (event, ui) {
+                    setSlide(ui.value);
+                }
+            });
+            var setSlide = function(index){
+                currentSlide = index;
+                val = values[currentSlide];
+               // val = index;
+                console.log(val+ " " + index);
+              //  mapObject.series.regions[0].setValues(data.states[index]);
+                mapObject.series.regions[0].setValues(data.states[values[currentSlide]]);
+                $('#time-slider').slider('value', values[currentSlide]);
+            };
+            $("#play").button({
+                icons: {
+                    primary: "ui-icon-play"
+                },
+                text: false
+            }).click(function () {
+                        if (playInterval != undefined) {
+                            clearInterval(playInterval);
+                            playInterval = undefined;
+                            $(this).button({
+                                icons: {
+                                    primary: "ui-icon-play"
+                                }
+                            });
+                            return;
+                        }
+                        $(this).button({
+                            icons: {
+                                primary: "ui-icon-pause"
+                            }
+                        });
+                        playInterval = setInterval(function () {
+                            currentSlide++;
+                            if (currentSlide >= values.length) {
+                                if (autoRewind) {
+                                    currentSlide = 0;
+                                }
+                                else {
+                                    clearInterval(playInterval);
+                                    return;
+                                }
+                            }
+
+                            setSlide(currentSlide);
+                            return;
+                        }, slideDuration);
+                    });
+        });
+    });
+
+</script>
+</body>
+</html>
